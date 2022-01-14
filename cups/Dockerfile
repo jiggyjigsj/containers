@@ -1,7 +1,7 @@
 FROM lemariva/rpi-cups
 
-RUN sudo apt-get update && \
-    sudo apt-get upgrade -y && \
-    sudo apt-get autoremove
+RUN sudo apt update && \
+    sudo apt upgrade -y && \
+    sudo apt autoremove
 
-ENTRYPOINT [ "sudo cupsctl --remote-any" ]
+ENTRYPOINT [ "sudo", "cupsctl", "--remote-any" ]
