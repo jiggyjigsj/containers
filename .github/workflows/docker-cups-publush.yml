@@ -7,7 +7,7 @@ name: cups-server-publish
 
 on:
   schedule:
-    - cron: '34 3 * * *'
+    - cron: '0 0 1 1 *' # Since this is an ARM based image, it wont build here.
   push:
     branches: [ main ]
     # Publish semver tags as releases.
