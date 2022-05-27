@@ -13,7 +13,7 @@ function clean {
   ns=$(echo $space | sed 's/%//')
   thres=75
 
-  log "Free space: ${space} and threshold at: ${thres}"
+  log "Free space: ${space} and threshold at: ${thres}%"
 
   paused=$(curl -m 5 -s http://${USER}:${PASS}@nzbget:6789/jsonrpc/status | jq .result.DownloadPaused)
 
@@ -27,8 +27,10 @@ function clean {
   fi
 }
 
+TIME="${60:-default}"
+
 while :
 do
   clean
-  sleep 30
+  sleep $TIME
 done
