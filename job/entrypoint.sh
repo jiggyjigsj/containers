@@ -27,7 +27,7 @@ function clean {
   fi
 }
 
-TIME="${60:-default}"
+TIME="${TIME:-60}"
 
 while :
 do
