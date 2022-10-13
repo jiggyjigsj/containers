@@ -22,7 +22,7 @@ env:
   IMAGE_NAME: ${{ github.repository }}/graylog-init
 
 
-graylog-init:
+jobs:
   build:
 
     runs-on: ubuntu-latest
