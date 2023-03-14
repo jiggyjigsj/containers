@@ -31,7 +31,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-
       # Allow me to build on arm based images
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
@@ -64,8 +63,9 @@ jobs:
       # https://github.com/docker/build-push-action
       - name: Build and push Docker image
         id: build-and-push
-        uses: docker/build-push-action@v2
+        uses: docker/build-push-action@v4
         with:
           context: kasm/ubuntu-sudo
+          platforms: 'arm64,arm'
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
