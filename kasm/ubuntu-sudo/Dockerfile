@@ -8,6 +8,8 @@ WORKDIR $HOME
 
 ######### Customize Container Here ###########
 
+RUN yes | unminimize
+
 RUN apt-get update \
     && apt-get install -y sudo \
     && echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \

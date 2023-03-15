@@ -20,7 +20,7 @@ env:
   REGISTRY: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}/code-server
-  PATH: code
+  DOCKER_FILEPATH: code
   PLATFORM: 'linux/amd64'
 
 jobs:
@@ -59,7 +59,7 @@ jobs:
         id: build-and-push
         uses: docker/build-push-action@v4
         with:
-          context: ${{ env.PATH }}
+          context: ${{ env.DOCKER_FILEPATH }}
           platforms: ${{ env.PLATFORM }}
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
