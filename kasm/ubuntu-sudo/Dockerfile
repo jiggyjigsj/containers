@@ -11,9 +11,11 @@ WORKDIR $HOME
 RUN yes | unminimize
 
 RUN apt-get update \
-    && apt-get install -y sudo \
+    && apt-get install -y sudo nano aptitude software-properties-common \
     && echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
     && rm -rf /var/lib/apt/list/*
+
+RUN apt-get install python3.8 python3-pip
 
 ######### End Customizations ###########
 
