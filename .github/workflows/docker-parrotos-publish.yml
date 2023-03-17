@@ -11,6 +11,7 @@ on:
   push:
     paths:
       - 'kasm/parrotos/Dockerfile'
+      - '.github/docker-parrotos-publish.yaml'
   # push:
   #   branches: [ main ]
   #   # Publish semver tags as releases.
