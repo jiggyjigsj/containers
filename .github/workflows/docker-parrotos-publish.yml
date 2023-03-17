@@ -17,8 +17,8 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}/ubuntu-focal-desktop
-  DOCKER_FILEPATH: kasm/ubuntu-sudo
+  IMAGE_NAME: ${{ github.repository }}/parrotos
+  DOCKER_FILEPATH: kasm/parrotos
   PLATFORM: 'linux/arm64'
 jobs:
   build:

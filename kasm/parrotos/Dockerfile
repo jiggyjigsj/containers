@@ -1,4 +1,4 @@
-FROM kasmweb/ubuntu-focal-desktop:develop
+FROM kasmweb/core-parrotos-5:develop
 USER root
 
 ENV HOME /home/kasm-default-profile
@@ -7,8 +7,6 @@ ENV INST_SCRIPTS $STARTUPDIR/install
 WORKDIR $HOME
 
 ######### Customize Container Here ###########
-
-RUN yes | unminimize
 
 RUN apt-get update \
     && apt-get install -y sudo nano aptitude software-properties-common \
