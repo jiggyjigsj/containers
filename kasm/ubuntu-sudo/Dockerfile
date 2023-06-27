@@ -15,7 +15,7 @@ RUN apt-get update \
     && echo 'kasm-user ALL=(ALL) NOPASSWD: ALL' >> /etc/sudoers \
     && rm -rf /var/lib/apt/list/*
 
-RUN apt-get install -y python3.8 python3-pip
+RUN apt-get install -y python3.8 python3-pip openssh-server
 
 ######### End Customizations ###########
 
