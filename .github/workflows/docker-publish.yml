@@ -6,15 +6,9 @@ name: publish-containers
 # documentation.
 
 on:
-  schedule:
-    - cron: '34 3 * * *'
   push:
-    paths:
-      - '**/Dockerfile'
   pull_request:
     branches: [ main ]
-    paths:
-      - '**/Dockerfile'
 
 env:
   # Use docker.io for Docker Hub if empty
@@ -37,23 +31,17 @@ jobs:
       - name: Get changed folders with Dockerfile
         id: get-changed-folders
         run: |
-          # Get all changed files
-          if [ "${{ github.event_name }}" = "schedule" ]; then
-            # On schedule, check all folders with Dockerfile
-            FOLDERS=$(find . -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | tr '\n' ',' | sed 's/,$//')
+          # Get changed files and find their parent folders with Dockerfile
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
           else
-            # On push/PR, get changed files and find their parent folders with Dockerfile
-            if [ "${{ github.event_name }}" = "pull_request" ]; then
-              CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
-            else
-              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
-            fi
-            FOLDERS=$(echo "$CHANGED_FILES" | xargs -I {} dirname {} | sort -u | while read dir; do
-              if [ -f "$dir/Dockerfile" ]; then
-                echo "$dir"
-              fi
-            done | tr '\n' ',' | sed 's/,$//')
+            CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
           fi
+          FOLDERS=$(echo "$CHANGED_FILES" | xargs -I {} dirname {} | sort -u | while read dir; do
+            if [ -f "$dir/Dockerfile" ]; then
+              echo "$dir"
+            fi
+          done | tr '\n' ',' | sed 's/,$//')
 
           if [ -n "$FOLDERS" ]; then
             echo "folders=$FOLDERS" >> $GITHUB_OUTPUT
