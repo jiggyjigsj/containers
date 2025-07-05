@@ -1,0 +1,107 @@
+name: publish-containers
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+on:
+  schedule:
+    - cron: '34 3 * * *'
+  push:
+    paths:
+      - '**/Dockerfile'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**/Dockerfile'
+
+env:
+  # Use docker.io for Docker Hub if empty
+  REGISTRY: ghcr.io
+  # github.repository as <account>/<repo>
+  IMAGE_NAME: ${{ github.repository }}
+  PLATFORM: 'linux/amd64'
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      changed-folders: ${{ steps.get-changed-folders.outputs.folders }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Get changed folders with Dockerfile
+        id: get-changed-folders
+        run: |
+          # Get all changed files
+          if [ "${{ github.event_name }}" = "schedule" ]; then
+            # On schedule, check all folders with Dockerfile
+            FOLDERS=$(find . -name "Dockerfile" -exec dirname {} \; | sed 's|^\./||' | tr '\n' ',' | sed 's/,$//')
+          else
+            # On push/PR, get changed files and find their parent folders with Dockerfile
+            if [ "${{ github.event_name }}" = "pull_request" ]; then
+              CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+            else
+              CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD)
+            fi
+            FOLDERS=$(echo "$CHANGED_FILES" | xargs -I {} dirname {} | sort -u | while read dir; do
+              if [ -f "$dir/Dockerfile" ]; then
+                echo "$dir"
+              fi
+            done | tr '\n' ',' | sed 's/,$//')
+          fi
+
+          if [ -n "$FOLDERS" ]; then
+            echo "folders=$FOLDERS" >> $GITHUB_OUTPUT
+          else
+            echo "folders=" >> $GITHUB_OUTPUT
+          fi
+
+  build:
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    if: needs.detect-changes.outputs.changed-folders != ''
+    strategy:
+      matrix:
+        folder: ${{ fromJson(format('[{0}]', needs.detect-changes.outputs.changed-folders)) }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Allow me to build on arm based images
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v2
+        with:
+          platforms: ${{ env.PLATFORM }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      # Login against a Docker registry
+      # https://github.com/docker/login-action
+      - name: Log into registry ${{ env.REGISTRY }}
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build and push Docker image with Buildx
+      # https://github.com/docker/build-push-action
+      - name: Build and push Docker image
+        id: build-and-push
+        uses: docker/build-push-action@v4
+        with:
+          context: ${{ matrix.folder }}
+          platforms: ${{ env.PLATFORM }}
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.folder }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}/${{ matrix.folder }}:pr-${{ github.event.number }}
