@@ -18,7 +18,7 @@ function clean {
   paused=$(curl -m 5 -s http://${USER}:${PASS}@nzbget:6789/jsonrpc/status | jq .result.DownloadPaused)
 
   if [[ ${paused} == "true" ]]; then
-    if [[ $ns -lt  $thres ]]; then
+    if [[ $ns -le  $thres ]]; then
       log "Resuming Downloads"
       curl -m 5 -s -XPOST http://${USER}:${PASS}@nzbget:6789/jsonrpc -d '{"method": "resumedownload"}' | jq .result
     fi
